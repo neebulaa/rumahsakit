@@ -1,5 +1,5 @@
 <?php 
-require_once "W_Error.php";
+require_once "W_ErrorValidator.php";
 
 class W_Validator {
     private $conn, $errorsObject;
@@ -9,7 +9,8 @@ class W_Validator {
 
         // rules key is input tag 'name', table 'field' if there is unique:tablename, and credentials 'equals key'.
         $this->rules = $rules;
-        $this->errorsObject = new W_Error();
+        $this->errorsObject = new W_ErrorValidator('Error Fields');
+        $this->errorsObject->setOld($this->credentials);
     }
 
     function validate(){
@@ -87,6 +88,7 @@ class W_Validator {
     function validated(){
         return $this->credentials;
     }
+
 }
 
 ?>

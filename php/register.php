@@ -2,12 +2,16 @@
 $GLOBALS['title'] = 'EHealt | Login';
 require_once "./functions.php";
 
+EnsureUserAuth($conn, 'register');
+
+
 if($_SERVER['REQUEST_METHOD'] === "POST"){
     if(isset($_POST['register'])){
         $result = register($_POST);
 
-        if($result instanceof W_Error){
+        if($result instanceof W_ErrorValidator){
             $errorCredentials = $result->getErrors();
+            $old = $result->old();
         }else{
             if($result > 0){
                 echo "
@@ -30,7 +34,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
 ?>
 
  
-<?php require_once "./header.php";?>
+<?php require_once "./partials/header.php";?>
 
 <div class="page" style="min-height: 100vh; display: grid; place-items: center;">
     <div class="row" style="width: 100%;">
@@ -40,7 +44,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
 
                 <div class="form-group my-3">
                     <label for="nama" class="mb-1">Nama</label>
-                    <input type="text" id="nama" name="nama" class="form-control"/>
+                    <input type="text" id="nama" name="nama" class="form-control" value="<?= $old['nama'] ?? ''?>"/>
 
                     <?php if(isset($errorCredentials['nama'])): ?>
                         <div class="text-danger" style="font-size: .9rem">
@@ -53,7 +57,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
 
                 <div class="form-group my-3">
                     <label for="email" class="mb-1">Email</label>
-                    <input type="email" id="email" name="email" class="form-control"/>
+                    <input type="email" id="email" name="email" class="form-control" value="<?= $old['email'] ?? ''?>"/>
 
                     <?php if(isset($errorCredentials['email'])): ?>
                         <div class="text-danger" style="font-size: .9rem">
@@ -101,5 +105,5 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
     </div>
 </div>
 
-<?php require_once "./footer.php";?>
+<?php require_once "./partials/footer.php";?>
 

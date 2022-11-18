@@ -1,5 +1,8 @@
 
 <?php 
+$dir = __DIR__;
+require_once "$dir/../../config.php";
+
 echo "<!DOCTYPE html>
 <html lang='en'>
 <head>
@@ -7,8 +10,8 @@ echo "<!DOCTYPE html>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>$title</title>
-    <link rel='stylesheet' href='../assets/css/style.css'>
-    <link rel='stylesheet' href='../assets/css/bootstrap.css'>
+    <link rel='stylesheet' href='$base_url/assets/css/style.css'>
+    <link rel='stylesheet' href='$base_url/assets/css/bootstrap.css'>
 </head>
 <body>"
 
