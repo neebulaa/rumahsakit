@@ -1,6 +1,6 @@
 <?php 
-require_once "./functions.php";
 $GLOBALS['title'] = 'EHealt | Login';
+require_once "./functions.php";
 
 EnsureUserAuth($conn, 'login');
 
@@ -29,7 +29,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
 
 <div class="page" style="min-height: 100vh; display: grid; place-items: center;">
     <div class="row" style="width: 100%;">
-        <div class="col-3 mx-auto border rounded" style="padding: 2rem;">
+        <div class="col-10 col-md-5 col-lg-4 col-xl-3 mx-auto border rounded" style="padding: 2rem;">
             <h2>Login Page</h2>
 
             <?php if(isset($error)): ?>
@@ -62,6 +62,11 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input type="checkbox" id="remember-me" class="form-check-input" name="remember-me">
+                    <label for="remember-me" class="form-check-label">Remember Me</label>
                 </div>
 
 

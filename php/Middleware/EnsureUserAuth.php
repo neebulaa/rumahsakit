@@ -7,12 +7,12 @@ function EnsureUserAuth($conn, $page = 'index'){
     global $base_url;
 
     $isLogin = $_SESSION['login'] ?? CheckToken($conn, $base_url);
-    $loginRoute = "http://localhost/school/11%20TKJ%201/rumahsakit/php/login.php";
+    $loginRoute = "$base_url/php/login.php";
     $indexRoute = $base_url;
 
-    $dontNeedAuth = ['login', 'register'];
+    $guest = ['login', 'register'];
 
-    if(in_array($page, $dontNeedAuth)){
+    if(in_array($page, $guest)){
         if($isLogin){
             header("Location: $indexRoute");
             exit();
@@ -72,12 +72,5 @@ function alreadyExpires($start, $end){
     return $end - $start <= 0;
 }
 
-
-// function getCurrentURI(){
-//     $uri = $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-//     $http_protocol = $_SERVER['SERVER_PORT'] === 443 ? "https://" : "http://";
-//     $uri = $http_protocol . $uri;
-//     return $uri;
-// }
 
 ?>

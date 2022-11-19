@@ -25,6 +25,11 @@ class W_Validator {
                     $valid = $this->checkRequired($this->credentials[$key]);
                     if(!$valid) $errorContainer[] = "$key wajib diisi.";
                 }
+
+                if($rule === 'digit'){
+                    $valid = $this->isDigit($this->credentials[$key]);
+                    if(!$valid) $errorContainer[] = "$key harus angka";
+                }
     
                 if(str_contains($rule, ':')){
                     [$funcType, $param] = explode(':', $rule);
@@ -55,9 +60,14 @@ class W_Validator {
             }
         }
     }
+
     function fails(){
         $this->validate();
         return count($this->errorsObject->getErrors()) > 0;
+    }
+    
+    function isDigit($data){
+        return is_numeric($data);
     }
 
     function checkRequired($data){

@@ -1,3 +1,10 @@
+:root {
+   --gradient: linear-gradient(90deg, rgb(56, 118, 217), rgb(118, 153, 235));
+   --gradient-purple: linear-gradient(90deg, rgb(174, 56, 217), rgb(235, 118, 134));
+}
+a {
+   text-decoration: none !important;
+}
 
 label {
    font-size: 14px;;
@@ -18,4 +25,118 @@ a.card {
 }
 .form-control:disabled, .form-select:disabled, textarea:disabled {
    background-color: #f5f5f5;
+}
+
+.text-gradient {
+   text-transform: capitalize;
+   background: var(--gradient);
+   background-clip: text;
+   color: transparent;
+}
+.background-gradient{
+   background: var(--gradient);
+}
+
+.text-gradient.purple {
+   background-image: var(--gradient-purple);
+}
+
+.custom-underline {
+   margin-bottom: 2rem;
+   position: relative;
+   width: max-content;
+}
+
+.custom-underline::after{
+   content: '';
+   position: absolute;
+   left: 0; 
+   bottom: -1rem;
+   background: var(--gradient);
+   height: 1px;
+   border-radius: 100px;
+   width: 100%;
+}
+
+.record-count {
+   font-size: 5rem;
+}
+
+
+/* toggle sidebar */
+.custom-sidebar {
+   position: relative;
+   /* transform: translateX(-260px); */
+   width: 50px !important;
+   transition: .3s;
+}
+
+.custom-sidebar li {
+   transform: translateX(-1rem);
+   transition: .3s;
+}
+.custom-sidebar .nav-link.active {
+   border-radius: 0 ;
+   transition: .3s;
+
+}
+
+.custom-sidebar li span, .custom-sidebar .logo{
+   display: none;
+   opacity: 0;
+   transition: .3s;
+}
+
+.custom-sidebar.sidebar-open {
+   width: 280px !important;
+   /* transform: translateX(0px); */
+}
+
+.custom-sidebar.sidebar-open li {
+   transform: translateX(0rem);
+}
+.custom-sidebar.sidebar-open .nav-link.active {
+   border-radius: 5px;
+}
+
+.custom-sidebar.sidebar-open li span, .custom-sidebar.sidebar-open .logo{
+   display: inline-block;
+   opacity: 1;
+}
+
+.toggle-sidebar {
+   position: absolute;
+   top: 50%;
+   right: 0;
+   transform: translate(50%, -50%) rotate(0);
+   border-radius: 50%;
+   background: var(--gradient);
+   width: 40px;
+   height: 40px;
+   color: white;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 1.1rem;
+   cursor: pointer;
+}
+
+.custom-sidebar.sidebar-open .toggle-sidebar {
+   transform: translate(50%, -50%) rotate(180deg);
+}
+
+
+.form-counter {
+   display: flex; 
+   align-items: center; 
+   justify-content: center; 
+   line-height: 1;
+   width: 30px;
+   height: 30px;
+   border-radius: 50%; 
+   top: 0rem; 
+   left: 0rem; 
+   transform: translate(-50%, -50%);
+   background: white;
+   box-shadow: 0 0 2px 2px rgba(0,0,0,.05);
 }

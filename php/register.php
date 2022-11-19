@@ -1,9 +1,11 @@
 <?php 
-$GLOBALS['title'] = 'EHealt | Login';
+$GLOBALS['title'] = 'EHealt | Register';
 require_once "./functions.php";
 
 EnsureUserAuth($conn, 'register');
 
+// email sender
+$sender = 'From:edwin.003@ski.sch.id';
 
 if($_SERVER['REQUEST_METHOD'] === "POST"){
     if(isset($_POST['register'])){
@@ -14,9 +16,10 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
             $old = $result->old();
         }else{
             if($result > 0){
+                mail($_POST['email'], 'Register Success', 'Registrasi Anda berhasil, silakan klik link ini untuk memverfikasi anda', $sender);
                 echo "
                     <script>
-                        alert('Anda berhasil register!');
+                        alert('Anda berhasil register! Sebuah Verifikasi telah dikirimkan ke email anda!');
                         document.location.href = './login.php';
                     </script>
                 ";
@@ -38,7 +41,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
 
 <div class="page" style="min-height: 100vh; display: grid; place-items: center;">
     <div class="row" style="width: 100%;">
-        <div class="col-3 mx-auto border rounded" style="padding: 2rem;">
+        <div class="col-10 col-md-5 col-lg-4 col-xl-3  mx-auto border rounded" style="padding: 2rem;">
             <h2>Register Page</h2>
             <form action="" method="post">
 
