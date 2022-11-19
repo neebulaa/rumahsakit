@@ -71,10 +71,9 @@ function login($data){
                 "email" => $user['email']
             ];
 
+            $user_id = $user['id'];
             $token = uniqid('', true);
             $expired_days_count = 3;
-            $user_id = $user['id'];
-
             $now = time();
             $expired_at = $now + (60 * 60 * 24) * $expired_days_count;
 
@@ -82,7 +81,9 @@ function login($data){
             $expiration_date = date("Y-m-d H:i:s", $expired_at);
 
             mysqli_query($conn, "INSERT INTO `tb_accesstoken` VALUES ('', '$user_id', '$token', '$login_date', '$expiration_date');");
-            setcookie('token', $token, $expired_at, $base_url);
+            
+            // cookie tdk akan hilang selama 3 tahun, akan hilang jika user login dgn token expired.
+            setcookie('token', $token, $expired_at * 365, $base_url); 
 
             return new W_Message("Login Berhasil!", 'success');
         }

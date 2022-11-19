@@ -6,7 +6,7 @@ function EnsureUserAuth($conn, $page = 'index'){
 
     global $base_url;
 
-    $isLogin = $_SESSION['login'] ?? CheckToken($conn);
+    $isLogin = $_SESSION['login'] ?? CheckToken($conn, $base_url);
     $loginRoute = "http://localhost/school/11%20TKJ%201/rumahsakit/php/login.php";
     $indexRoute = $base_url;
 
@@ -28,7 +28,7 @@ function EnsureUserAuth($conn, $page = 'index'){
 }
 
 
-function CheckToken($conn){
+function CheckToken($conn, $base_url){
     $token = $_COOKIE['token'] ?? null;
 
     if(!$token){
@@ -41,10 +41,9 @@ function CheckToken($conn){
 
         // checkexpiracy
         $expirationtime = mktime(...splitTimeStamp($user['expiration_date']));
-
-        // token nya tetap akan tersimpan di db, kalau user tidak pakai token sebelumnya yang sudah expired.
         if(alreadyExpires(time(), $expirationtime)){
             mysqli_query($conn, "DELETE FROM `tb_accesstoken` WHERE `token` = $token"); //delete token record
+            setcookie('token', '', time() - 3600, $base_url);
             return false;
         }
 
