@@ -50,6 +50,11 @@ class W_Validator {
                         case 'same':
                             $valid = $this->checkSame($this->credentials[$key], $param);
                             if(!$valid) $errorContainer[] = "$key tidak sesuai dengan $param";
+                        case 'enum':
+                            $valid = $this->enum($this->credentials[$key], $param);
+                            $opts = explode(',', $param);
+                            $opts = implode(' atau ', $opts);
+                            if(!$valid) $errorContainer[] = "$key harus $opts";
                     }
                 }
     
@@ -68,6 +73,11 @@ class W_Validator {
     
     function isDigit($data){
         return is_numeric($data);
+    }
+
+    function enum($data, $options){
+        $opts = explode(',', $options);
+        return in_array($data, $opts);
     }
 
     function checkRequired($data){
