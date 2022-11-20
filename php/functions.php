@@ -4,6 +4,8 @@ require_once "$dir/Classes/W_Validator.php";
 require_once "$dir/Classes/W_Message.php";
 require_once "$dir/Middleware/EnsureUserAuth.php";
 require_once "$dir/../config.php";
+require_once "$dir/table_init.php";
+
 session_start();
 
 $conn = mysqli_connect('localhost', 'root', '', 'rumahsakit');
@@ -94,6 +96,28 @@ function w_validator_errors_contains_errors($errors){
     return count(array_filter($errors, fn($e) => count($e->getErrors()) > 0)) > 0;
 }
 
+function getTableFields($table){
+    global $tables;
+    $fields = $tables[$table];
+
+    $formatted = [];
+    foreach($fields as $field => $type){
+        if($type === 'id'){
+            $formatted['id'] = $field;
+        }else if($type === 'basic'){
+            $formatted['fields'][] = $field;
+        }
+    }
+
+    return [$formatted['id'], $formatted['fields']];
+}
+
+function getTableRules($table){
+    global $tablesRules;
+    $rules = $tablesRules[$table];
+    return $rules;
+}
+
 
 // auth
 function register($data){
@@ -179,30 +203,39 @@ function login($data){
 
 // CRUD
 function search($keyword, $table){
-    $query = "SELECT * FROM `$table` WHERE
-    `nama_dokter` LIKE '%$keyword%' OR
-    `spesialis` LIKE '%$keyword%' OR
-    `alamat` LIKE '%$keyword%' OR
-    `no_telp` LIKE '%$keyword%'";
+    [$tbId, $tbFields] = getTableFields($table);
+    $query = "SELECT * FROM `$table` WHERE ";
+    foreach($tbFields as $index => $field){
+        $query .= "$field LIKE '%$keyword%'";
 
+        if($index !== count($tbFields) - 1){
+            $query .= " OR ";
+        }
+    }
     return query($query);
 }
 
 function searchWithLimit($keyword, $start, $limit, $table){
-    $query = "SELECT * FROM `$table` WHERE
-    `nama_dokter` LIKE '%$keyword%' OR
-    `spesialis` LIKE '%$keyword%' OR
-    `alamat` LIKE '%$keyword%' OR
-    `no_telp` LIKE '%$keyword%'
-    LIMIT $start, $limit
-    ";
+    [$tbId, $tbFields] = getTableFields($table);
+    $query = "SELECT * FROM `$table` WHERE ";
+    foreach($tbFields as $index => $field){
+        $query .= "$field LIKE '%$keyword%'";
 
+        if($index !== count($tbFields) - 1){
+            $query .= " OR ";
+        }
+    }
+    $query .= " LIMIT $start, $limit";
     return query($query);
+
 }
 
 
 function add($datas, $table){
     global $conn;
+
+    [$tbId, $tbFields] = getTableFields($table);
+    $tableRules = getTableRules($table);
 
     $errors = [];
     foreach($datas as $index => $data){
@@ -212,12 +245,13 @@ function add($datas, $table){
         }, $data);
 
         $dataKey = $index + 1;
-        $validator = new W_Validator($conn, $data, [
-            "nama_dokter--$dataKey" => "required|min:3|max:255",
-            "spesialis--$dataKey" => "required|min:3|max:255",
-            "alamat--$dataKey" => "required|min:8|max:255",
-            "no_telp--$dataKey" => "required|digit|min:10|max:12"
-        ]);
+
+        $rulesFormatted = [];
+        foreach($tableRules as $field => $rules){
+            $rulesFormatted["$field--$dataKey"] = $rules;
+        }
+
+        $validator = new W_Validator($conn, $data, $rulesFormatted);
 
         if($validator->fails()){
             $errors[] = $validator->errors();
@@ -230,20 +264,30 @@ function add($datas, $table){
         return $forms_error;
     }
 
-    $query = "INSERT INTO `$table` VALUES ";
+    $onlyFields = implode(', ', $tbFields);
+    $query = "INSERT INTO `$table` ($onlyFields) VALUES ";
 
     foreach($datas as $index => $data){
         $dataKey = $index + 1;
-        $nama_dokter = $data["nama_dokter--$dataKey"];
-        $spesialis = $data["spesialis--$dataKey"];
-        $alamat = $data["alamat--$dataKey"];
-        $no_telp = $data["no_telp--$dataKey"];
 
-        $query .= "('', '$nama_dokter', '$spesialis', '$alamat', '$no_telp')";
+        $statement = "(";
+        foreach($tbFields as $fi => $f){
+            $val = $data["$f--$dataKey"];
+            $statement .= "'$val'";
+
+            if($fi !== count($tbFields) - 1){
+                $statement .= ", ";
+            }
+        }
+        $statement .= ")";
+
+        $query .= $statement;
         if($index != count($datas) - 1){
             $query .= ", ";
         }
     }
+    // var_dump($query);
+    // die();
 
     mysqli_query($conn, $query);
 
@@ -256,6 +300,9 @@ function add($datas, $table){
 
 function edit($datas, $table){
     global $conn;
+    
+    [$tbId, $tbFields] = getTableFields($table);
+    $tableRules = getTableRules($table);
 
     $errors = [];
     foreach($datas as $index => $data){
@@ -265,12 +312,13 @@ function edit($datas, $table){
         }, $data);
 
         $dataKey = $index + 1;
-        $validator = new W_Validator($conn, $data, [
-            "nama_dokter--$dataKey" => "required|min:3|max:255",
-            "spesialis--$dataKey" => "required|min:3|max:255",
-            "alamat--$dataKey" => "required|min:10|max:255",
-            "no_telp--$dataKey" => "required|digit|min:8|max:15"
-        ]);
+
+        $rulesFormatted = [];
+        foreach($tableRules as $field => $rules){
+            $rulesFormatted["$field--$dataKey"] = $rules;
+        }
+
+        $validator = new W_Validator($conn, $data, $rulesFormatted);
 
         if($validator->fails()){
             $errors[] = $validator->errors();
@@ -285,19 +333,19 @@ function edit($datas, $table){
 
     foreach($datas as $index => $data){
         $dataKey = $index + 1;
-        $id = $data["id--$dataKey"];
-        $nama_dokter = $data["nama_dokter--$dataKey"];
-        $spesialis = $data["spesialis--$dataKey"];
-        $alamat = $data["alamat--$dataKey"];
-        $no_telp = $data["no_telp--$dataKey"];
 
-        $query = "UPDATE `$table` SET 
-            nama_dokter = '$nama_dokter', 
-            spesialis = '$spesialis', 
-            alamat = '$alamat', 
-            no_telp = '$no_telp'
-            WHERE id = $id;
-        ";
+        $query = "UPDATE `$table` SET ";
+        foreach($tbFields as $fi => $f){
+            $dataField = $data["$f--$dataKey"];
+            $query .= "$f = '$dataField'";
+
+            if($fi !== count($tbFields) - 1){
+                $query .= ', ';
+            }
+        }
+        $id = $data["$tbId--$dataKey"];
+        $query .= " WHERE `$tbId` = $id";
+
         mysqli_query($conn, $query);
     }
      
@@ -310,12 +358,14 @@ function edit($datas, $table){
     // }
 }
 
-function delete($ids){
+function delete($ids, $table){
     global $conn;
-    $query = "DELETE FROM `tb_dokter` WHERE ";
+    [$tbId, $tbFields] = getTableFields($table);
+
+    $query = "DELETE FROM `$table` WHERE ";
 
     foreach($ids as $index => $id){
-        $query .= "id = $id";
+        $query .= "`$tbId` = $id";
         if($index != count($ids) - 1){
             $query .= " OR ";
         }

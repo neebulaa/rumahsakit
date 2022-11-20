@@ -1,8 +1,8 @@
 <?php 
 require_once "../functions.php";
 
-EnsureUserAuth($conn, 'php/dokter/hapus.php');
-$current_table = 'tb_dokter';
+EnsureUserAuth($conn, 'php/obat/hapus.php');
+$current_table = 'tb_obat';
 
 if(count($_POST) <= 0 || $_SERVER['REQUEST_METHOD'] === "GET") {
     $_SESSION['process-failed'] = "Silakan pilih data terlebih dahulu!";

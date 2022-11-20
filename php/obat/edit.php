@@ -1,9 +1,9 @@
 <?php 
-$GLOBALS['title'] = "EHealth | Edit Dokter";
+$GLOBALS['title'] = "EHealth | Edit Obat";
 require_once "../functions.php";
-EnsureUserAuth($conn, 'php/dokter/edit.php');
+EnsureUserAuth($conn, 'php/obat/edit.php');
 
-$current_table = 'tb_dokter';
+$current_table = 'tb_obat';
 
 if(count($_POST) <= 0 || $_SERVER['REQUEST_METHOD'] === "GET") {
     $_SESSION['process-failed'] = "Silakan pilih data terlebih dahulu!";
@@ -57,10 +57,10 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
     <div class="container-fluid py-5 mx-5" style="overflow-y: auto; max-height: 100vh;">
     <h1 class="align-items-center d-flex gap-3">
             <a href="./index.php"><i class="fa-solid fa-arrow-left fs-3"></i></a>
-            Edit Dokter
+            Edit Obat
         </h1>
 
-        <p class="text-muted">Edit dokter EHealth.</p>
+        <p class="text-muted">Edit obat EHealth.</p>
 
         <div class="custom-underline w-100"></div>
 
@@ -80,44 +80,23 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                     <h5 class="position-absolute text-primary form-counter" style="opacity: .9"><?= $i?></h5>
 
                     <div class="form-group mb-3">
-                        <label for="nama_dokter--<?= $i?>" class="form-label text-muted fs-6 mb-1">Nama Dokter</label>
-                        <input type="text" name="nama_dokter--<?= $i?>" id="nama_dokter--<?= $i?>" class="form-control" value="<?= $old["nama_dokter--$i"] ?? $data['nama_dokter']?>">
-                        <?php if(isset($errorCredentials["nama_dokter--$i"])): ?>
+                        <label for="nama_obat--<?= $i?>" class="form-label text-muted fs-6 mb-1">Nama Obat</label>
+                        <input type="text" name="nama_obat--<?= $i?>" id="nama_obat--<?= $i?>" class="form-control" value="<?= $old["nama_obat--$i"] ?? $data['nama_obat']?>">
+                        <?php if(isset($errorCredentials["nama_obat--$i"])): ?>
                             <div class="text-danger" style="font-size: .9rem">
-                                <?php foreach($errorCredentials["nama_dokter--$i"] as $err): ?>
+                                <?php foreach($errorCredentials["nama_obat--$i"] as $err): ?>
                                     <p class="mb-0"><?= $err?></p>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
                     </div>
                     <div class="form-group mb-3">
-                        <label for="spesialis--<?= $i?>" class="form-label text-muted fs-6 mb-1">Spesialis</label>
-                        <input type="text" name="spesialis--<?= $i?>" id="spesialis--<?= $i?>" class="form-control" value="<?= $old["spesialis--$i"] ?? $data['spesialis']?>">
-                        <?php if(isset($errorCredentials["spesialis--$i"])): ?>
+                        <label for="ket_obat--<?= $i?>" class="form-label text-muted fs-6 mb-1">Keterangan Obat</label>
+
+                        <textarea name="ket_obat--<?= $i?>" id="ket_obat--<?= $i?>" class="form-control" style="resize: none; min-height: 10rem;"><?= $old["ket_obat--$i"] ?? $data['ket_obat']?></textarea>
+                        <?php if(isset($errorCredentials["ket_obat--$i"])): ?>
                             <div class="text-danger" style="font-size: .9rem">
-                                <?php foreach($errorCredentials["spesialis--$i"] as $err): ?>
-                                    <p class="mb-0"><?= $err?></p>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="alamat--<?= $i?>" class="form-label text-muted fs-6 mb-1">Alamat</label>
-                        <input type="text" name="alamat--<?= $i?>" id="alamat--<?= $i?>" class="form-control" value="<?= $old["alamat--$i"] ?? $data['alamat']?>">
-                        <?php if(isset($errorCredentials["alamat--$i"])): ?>
-                            <div class="text-danger" style="font-size: .9rem">
-                                <?php foreach($errorCredentials["alamat--$i"] as $err): ?>
-                                    <p class="mb-0"><?= $err?></p>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="no_telp--<?= $i?>" class="form-label text-muted fs-6 mb-1">No Telpon</label>
-                        <input type="text" name="no_telp--<?= $i?>" id="no_telp--<?= $i?>" class="form-control" value="<?= $old["no_telp--$i"] ?? $data['no_telp']?>">
-                        <?php if(isset($errorCredentials["no_telp--$i"])): ?>
-                            <div class="text-danger" style="font-size: .9rem">
-                                <?php foreach($errorCredentials["no_telp--$i"] as $err): ?>
+                                <?php foreach($errorCredentials["ket_obat--$i"] as $err): ?>
                                     <p class="mb-0"><?= $err?></p>
                                 <?php endforeach; ?>
                             </div>

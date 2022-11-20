@@ -3,7 +3,7 @@ require_once "../../php/functions.php";
 $keyword = $_GET['search'];
 
 
-$current_table = 'tb_dokter';
+$current_table = 'tb_obat';
 
 
 $datas = search($keyword, $current_table);
@@ -22,16 +22,14 @@ $datas = searchWithLimit($keyword, $start, $limit, $current_table);
 <?php if(count($datas) > 0): ?>
 <form action="" method="post" id="checked_form">
     <table class="table table-striped table-bordered caption-top">
-        <caption>Saat ini <?= $total_datas?> dokter.</caption>
+        <caption>Saat ini <?= $total_datas?> obat.</caption>
         <tr>
             <th>
                 <input type="checkbox" class="form-check-input mx-auto d-block" id="select-all-checks" style="width: 20px; height: 20px;">
             </th>
             <th>No</th>
-            <th>Nama Dokter</th>
-            <th>Spesialis</th>
-            <th>Alamat</th>
-            <th>No Telp</th>
+            <th>Nama Obat</th>
+            <th>Keterangan Obat</th>
         </tr>
 
         <?php $i = $start + 1; foreach($datas as $data): ?>
@@ -40,10 +38,8 @@ $datas = searchWithLimit($keyword, $start, $limit, $current_table);
                     <input type="checkbox" class="form-check-input checks mx-auto d-block" style="width: 20px; height: 20px;" name="<?= "select_single_$i"?>" value="<?= $data['id']?>">
                 </td>
                 <td><?= $i?></td>
-                <td><?= $data['nama_dokter']?></td>
-                <td><?= $data['spesialis']?></td>
-                <td><?= $data['alamat']?></td>
-                <td><?= $data['no_telp']?></td>
+                <td><?= $data['nama_obat']?></td>
+                <td><?= $data['ket_obat']?></td>
             </tr>
         <?php $i++; endforeach; ?>
     </table>
