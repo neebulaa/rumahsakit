@@ -25,10 +25,11 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
             $errorCredentials = $mergeErrorCredentials['errors'];
         }else{
             if($result->status == 'success'){
+                $_SESSION['process-success'] = $result->message;
                 header('Location: ./index.php');
                 exit;
             }else{
-                $error = $result->message;
+                $error_process = $result->message;
             }
         }
     }
@@ -61,6 +62,12 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                 </form>
             </div>
         </div>
+
+        <?php if(isset($error_process)): ?>
+            <div class="alert alert-danger mt-4" role="alert">
+                <?= $error_process?>
+            </div>
+        <?php endif; ?>
 
 
         <form action="" method="post" class="mt-5">

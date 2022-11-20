@@ -5,6 +5,7 @@ require_once "../functions.php";
 EnsureUserAuth($conn, "php/dokter");
 
 $datas = query("SELECT * FROM `tb_dokter`");
+$total_datas = count($datas);
 
 $limit = 10;
 $current_page = (int) ($_GET['page'] ?? 1);
@@ -46,13 +47,32 @@ if(isset($_GET['search'])){
             <a href="./tambah.php" class="btn btn-outline-primary">Tambah</a>
         </div>
 
+        <?php if(isset($_SESSION['process-success'])): ?>
+            <div class="alert alert-success mt-4" role="alert" style="max-width: 480px;">
+                <?= $_SESSION['process-success']?>
+
+                <?php unset($_SESSION['process-success']); ?>
+            </div>
+        <?php endif; ?>
+
+
+        <?php if(isset($_SESSION['process-failed'])): ?>
+            <div class="alert alert-danger mt-4" role="alert" style="max-width: 480px;">
+                <?= $_SESSION['process-failed']?>
+
+                <?php unset($_SESSION['process-failed']); ?>
+            </div>
+        <?php endif; ?>
+
+
         <?php if(count($datas) > 0): ?>
         <div class="table-responsive" id="table-element">
             <form action="" method="post" id="checked_form">
-                <table class="table table-striped table-bordered">
+                <table class="table table-striped table-bordered caption-top">
+                    <caption>Saat ini <?= $total_datas?> dokter.</caption>
                     <tr>
                         <th>
-                            <input type="checkbox" class="form-check-input" id="select-all-checks" style="width: 20px; height: 20px;">
+                            <input type="checkbox" class="form-check-input mx-auto d-block" id="select-all-checks" style="width: 20px; height: 20px;">
                         </th>
                         <th>No</th>
                         <th>Nama Dokter</th>
@@ -61,10 +81,10 @@ if(isset($_GET['search'])){
                         <th>No Telp</th>
                     </tr>
 
-                    <?php $i = 1; foreach($datas as $data): ?>
+                    <?php $i = $start + 1; foreach($datas as $data): ?>
                         <tr>
                             <td>
-                                <input type="checkbox" class="form-check-input checks" style="width: 20px; height: 20px;" name="<?= "select_single_$i"?>" value="<?= $data['id']?>">
+                                <input type="checkbox" class="form-check-input checks mx-auto d-block" style="width: 20px; height: 20px;" name="<?= "select_single_$i"?>" value="<?= $data['id']?>">
                             </td>
                             <td><?= $i?></td>
                             <td><?= $data['nama_dokter']?></td>
@@ -102,7 +122,7 @@ if(isset($_GET['search'])){
         </div>
 
         <?php else: ?>
-            <h4>Saat ini tidak ada data.</h4>
+            <h4 class="mt-3 mb-4">Saat ini tidak ada data.</h4>
         <?php endif; ?>
     </div>
 </div>

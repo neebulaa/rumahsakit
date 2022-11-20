@@ -5,12 +5,9 @@ EnsureUserAuth($conn, 'php/dokter/edit.php');
 
 
 if(count($_POST) <= 0 || $_SERVER['REQUEST_METHOD'] === "GET") {
-    echo "
-        <script>
-            alert('Silakan pilih data terlebih dahulu!');
-            document.location.href = './index.php';
-        </script>
-    ";
+    $_SESSION['process-failed'] = "Silakan pilih data terlebih dahulu!";
+    header("Location: ./index.php");
+    exit();
 }
 
 
@@ -28,10 +25,11 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
             $errorCredentials = $mergeErrorCredentials['errors'];
         }else{
             if($result->status == 'success'){
+                $_SESSION['process-success'] = $result->message;
                 header('Location: ./index.php');
                 exit;
             }else{
-                $error = $result->message;
+                $error_process = $result->message;
             }
         }
     }else{
@@ -64,6 +62,13 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
         <p class="text-muted">Edit dokter EHealth.</p>
 
         <div class="custom-underline w-100"></div>
+
+        <?php if(isset($error_process)): ?>
+            <div class="alert alert-danger mt-4" role="alert">
+                <?= $error_process?>
+            </div>
+        <?php endif; ?>
+
         <form action="" method="post" class="mt-5">
             <div class="d-flex gap-4 flex-wrap">
 

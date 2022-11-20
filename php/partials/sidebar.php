@@ -9,7 +9,7 @@ $page = getPage();
 
 <div class="d-flex flex-column flex-shrink-0 p-3 custom-sidebar" style="width: 280px; min-height: 100vh; box-shadow: 5px 0 5px rgba(0,0,0,.05)" >
     <div class="toggle-sidebar"><i class="fa-solid fa-arrow-right"></i></div>
-    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+    <a href="<?= $base_url?>" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
         <i class="fa-solid fa-notes-medical me-2 fs-4"></i>
         <span class="fs-4 logo">E<span class="text-primary">Health</span></span>
     </a>
@@ -22,31 +22,31 @@ $page = getPage();
         </a>
         </li>
         <li>
-        <a href="<?= "$base_url/php/dokter/index.php"?>" class="nav-link <?= $page == '/php/dokter/index.php' ? 'active' : 'link-dark'?>">
+        <a href="<?= "$base_url/php/dokter/index.php"?>" class="nav-link <?= str_contains($page,'/php/dokter') ? 'active' : 'link-dark'?>">
         <i class="fa-solid fa-stethoscope"></i>
             <span class="ms-2">Dokter</span>
         </a>
         </li>
         <li>
-        <a href="<?= "$base_url/php/pasien/index.php"?>" class="nav-link <?= $page == '/php/pasien/index.php' ? 'active' : 'link-dark'?>">
+        <a href="<?= "$base_url/php/pasien/index.php"?>" class="nav-link <?= str_contains($page,'/php/pasien') ? 'active' : 'link-dark'?>">
         <i class="fa-solid fa-bed"></i>
             <span class="ms-2">Pasien</span>
         </a>
         </li>
         <li>
-        <a href="<?= "$base_url/php/obat/index.php"?>" class="nav-link <?= $page == '/php/obat/index.php' ? 'active' : 'link-dark'?>">
+        <a href="<?= "$base_url/php/obat/index.php"?>" class="nav-link <?= str_contains($page,'/php/obat') ? 'active' : 'link-dark'?>">
         <i class="fa-solid fa-prescription-bottle-medical"></i>
             <span class="ms-2">Obat</span>
         </a>
         </li>
         <li>
-        <a href="<?= "$base_url/php/poliklinik/index.php"?>" class="nav-link <?= $page == '/php/poliklinik/index.php' ? 'active' : 'link-dark'?>">
+        <a href="<?= "$base_url/php/poliklinik/index.php"?>" class="nav-link <?= str_contains($page,'/php/poliklinik') ? 'active' : 'link-dark'?>">
         <i class="fa-solid fa-house-chimney-medical"></i>
             <span class="ms-2">Poliklinik</span>
         </a>
         </li>
         <li>
-        <a href="<?= "$base_url/php/rekammedis/index.php"?>" class="nav-link <?= $page == '/php/rekammedis/index.php' ? 'active' : 'link-dark'?>">
+        <a href="<?= "$base_url/php/rekammedis/index.php"?>" class="nav-link <?= str_contains($page,'/php/rekammedis') ? 'active' : 'link-dark'?>">
         <i class="fa-solid fa-clipboard"></i>
             <span class="ms-2">Rekam Medis</span>
         </a>

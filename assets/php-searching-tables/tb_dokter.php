@@ -3,7 +3,7 @@ require_once "../../php/functions.php";
 $keyword = $_GET['search'];
 
 $datas = search($keyword, 'tb_dokter');
-
+$total_datas = count($datas);
 
 // pagination
 $limit = 10;
@@ -17,10 +17,11 @@ $datas = searchWithLimit($keyword, $start, $limit, 'tb_dokter');
 
 <?php if(count($datas) > 0): ?>
 <form action="" method="post" id="checked_form">
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered caption-top">
+        <caption>Saat ini <?= $total_datas?> dokter.</caption>
         <tr>
             <th>
-                <input type="checkbox" class="form-check-input" id="select-all-checks" style="width: 20px; height: 20px;">
+                <input type="checkbox" class="form-check-input mx-auto d-block" id="select-all-checks" style="width: 20px; height: 20px;">
             </th>
             <th>No</th>
             <th>Nama Dokter</th>
@@ -29,10 +30,10 @@ $datas = searchWithLimit($keyword, $start, $limit, 'tb_dokter');
             <th>No Telp</th>
         </tr>
 
-        <?php $i = 1; foreach($datas as $data): ?>
+        <?php $i = $start + 1; foreach($datas as $data): ?>
             <tr>
                 <td>
-                    <input type="checkbox" class="form-check-input checks" style="width: 20px; height: 20px;" name="<?= "select_single_$i"?>" value="<?= $data['id']?>">
+                    <input type="checkbox" class="form-check-input checks mx-auto d-block" style="width: 20px; height: 20px;" name="<?= "select_single_$i"?>" value="<?= $data['id']?>">
                 </td>
                 <td><?= $i?></td>
                 <td><?= $data['nama_dokter']?></td>
@@ -63,5 +64,5 @@ $datas = searchWithLimit($keyword, $start, $limit, 'tb_dokter');
     </ul>
 </nav>
 <?php else: ?>
-    <h4>Saat ini tidak ada data.</h4>
+    <h4 class="mt-3 mb-4">Saat ini tidak ada data.</h4>
 <?php endif; ?>
