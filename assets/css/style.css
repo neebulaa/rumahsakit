@@ -31,6 +31,7 @@ a.card {
    text-transform: capitalize;
    background: var(--gradient);
    background-clip: text;
+   -webkit-background-clip: text;
    color: transparent;
 }
 .background-gradient{

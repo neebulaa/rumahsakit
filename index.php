@@ -28,29 +28,24 @@ $counts = getCounts('tb_pasien', 'tb_dokter', 'tb_obat', 'tb_poliklinik', 'tb_re
 
         <div class="custom-underline w-100"></div>
 
-        <main class="d-flex">
-            
-            <div class="cards mt-5 d-flex gap-4 flex-wrap">
-                <?php foreach($counts as $table => $count): ?>
-                <a href="" class="d-block mb-3 border" style="text-decoration:none; color: inherit; padding: 1.5rem 2rem;flex: 1 1 480px;">
-                    <div class="d-flex align-items-center flex-wrap" style="gap: 2rem;">
-                        <div class="d-flex justify-content-center align-items-center flex-column" style="max-width: max-content;">
-                            <div class="record-count text-gradient purple" style="line-height:1; "><?= $count?></div>
-                            <span class="text-gradient purple fs-6">RECORDS</span>
-                        </div>  
-                        <div style="max-width: 70%;">
-                            <h4 style="font-weight: 600;"><?= $table?></h4>
-                            <p style="font-size: .95rem;">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis, consequatur.</p>
-                        </div>
+        
+        <div class="cards mt-5 d-flex gap-4 flex-wrap align-items-start">
+            <?php foreach($counts as $table => $count): ?>
+            <a href="<?= $base_url . '/php' . '/' . explode('_', $table)[1];// [tb, pasien, count] ?>" class="d-block mb-3 border" style="text-decoration:none; color: inherit; padding: 1.5rem 2rem;flex: 1 1 480px;">
+                <div class="d-flex align-items-center flex-wrap" style="gap: 2rem;">
+                    <div class="d-flex justify-content-center align-items-center flex-column" style="max-width: max-content;">
+                        <div class="record-count text-gradient purple" style="line-height:1; "><?= $count?></div>
+                        <span class="text-gradient purple fs-6">RECORDS</span>
+                    </div>  
+                    <div style="max-width: 70%;">
+                        <h4 style="font-weight: 600;"><?= $table?></h4>
+                        <p style="font-size: .95rem;">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Perferendis, consequatur.</p>
                     </div>
-                </a>
-                <?php endforeach; ?>
-            </div>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
 
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-        </main>
     </div> 
 </div>
 

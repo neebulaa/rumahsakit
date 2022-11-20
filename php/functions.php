@@ -76,6 +76,24 @@ function w_validator_errors_merge($arrayOfWErrors){
     return $formatted;
 }
 
+function normalizeKeys($datas) {
+    $records = [];
+    foreach($datas as $row){
+        $arr = [];
+        foreach($row as $key => $col){
+            // ex: nama_dokter--1 => "Edwin Hendly"
+            [$key, $prefix] = explode('--', $key);
+            $arr[$key] = $col;
+        }        
+        $records[] = $arr;
+    }
+    return $records;
+}
+
+function w_validator_errors_contains_errors($errors){
+    return count(array_filter($errors, fn($e) => count($e->getErrors()) > 0)) > 0;
+}
+
 
 // auth
 function register($data){
@@ -160,6 +178,29 @@ function login($data){
 
 
 // CRUD
+function search($keyword, $table){
+    $query = "SELECT * FROM `$table` WHERE
+    `nama_dokter` LIKE '%$keyword%' OR
+    `spesialis` LIKE '%$keyword%' OR
+    `alamat` LIKE '%$keyword%' OR
+    `no_telp` LIKE '%$keyword%'";
+
+    return query($query);
+}
+
+function searchWithLimit($keyword, $start, $limit, $table){
+    $query = "SELECT * FROM `$table` WHERE
+    `nama_dokter` LIKE '%$keyword%' OR
+    `spesialis` LIKE '%$keyword%' OR
+    `alamat` LIKE '%$keyword%' OR
+    `no_telp` LIKE '%$keyword%'
+    LIMIT $start, $limit
+    ";
+
+    return query($query);
+}
+
+
 function add($datas, $table){
     global $conn;
 
@@ -172,10 +213,10 @@ function add($datas, $table){
 
         $dataKey = $index + 1;
         $validator = new W_Validator($conn, $data, [
-            "nama_dokter_$dataKey" => "required|min:3|max:255",
-            "spesialis_$dataKey" => "required|min:3|max:255",
-            "alamat_$dataKey" => "required|min:10|max:255",
-            "no_telp_$dataKey" => "required|digit|min:8|max:15"
+            "nama_dokter--$dataKey" => "required|min:3|max:255",
+            "spesialis--$dataKey" => "required|min:3|max:255",
+            "alamat--$dataKey" => "required|min:8|max:255",
+            "no_telp--$dataKey" => "required|digit|min:10|max:12"
         ]);
 
         if($validator->fails()){
@@ -184,7 +225,7 @@ function add($datas, $table){
     }
 
     if(count($errors) > 0){
-        $forms_error =  new W_ErrorValidator('Forms Error');
+        $forms_error = new W_ErrorValidator('Forms Error');
         $forms_error->setNewError('forms_error', $errors);
         return $forms_error;
     }
@@ -193,16 +234,17 @@ function add($datas, $table){
 
     foreach($datas as $index => $data){
         $dataKey = $index + 1;
-        $nama_dokter = $data["nama_dokter_$dataKey"];
-        $spesialis = $data["spesialis_$dataKey"];
-        $alamat = $data["alamat_$dataKey"];
-        $no_telp = $data["no_telp_$dataKey"];
+        $nama_dokter = $data["nama_dokter--$dataKey"];
+        $spesialis = $data["spesialis--$dataKey"];
+        $alamat = $data["alamat--$dataKey"];
+        $no_telp = $data["no_telp--$dataKey"];
 
         $query .= "('', '$nama_dokter', '$spesialis', '$alamat', '$no_telp')";
         if($index != count($datas) - 1){
             $query .= ", ";
         }
     }
+
     mysqli_query($conn, $query);
 
     if(mysqli_affected_rows($conn) > 0){
@@ -211,6 +253,7 @@ function add($datas, $table){
         return new W_Message('Data gagal ditambahkan!', 'failed');
     }
 }
+
 function edit($datas, $table){
     global $conn;
 
@@ -223,10 +266,10 @@ function edit($datas, $table){
 
         $dataKey = $index + 1;
         $validator = new W_Validator($conn, $data, [
-            "nama_dokter_$dataKey" => "required|min:3|max:255",
-            "spesialis_$dataKey" => "required|min:3|max:255",
-            "alamat_$dataKey" => "required|min:10|max:255",
-            "no_telp_$dataKey" => "required|digit|min:8|max:15"
+            "nama_dokter--$dataKey" => "required|min:3|max:255",
+            "spesialis--$dataKey" => "required|min:3|max:255",
+            "alamat--$dataKey" => "required|min:10|max:255",
+            "no_telp--$dataKey" => "required|digit|min:8|max:15"
         ]);
 
         if($validator->fails()){
@@ -242,11 +285,11 @@ function edit($datas, $table){
 
     foreach($datas as $index => $data){
         $dataKey = $index + 1;
-        $id = $data["id_$dataKey"];
-        $nama_dokter = $data["nama_dokter_$dataKey"];
-        $spesialis = $data["spesialis_$dataKey"];
-        $alamat = $data["alamat_$dataKey"];
-        $no_telp = $data["no_telp_$dataKey"];
+        $id = $data["id--$dataKey"];
+        $nama_dokter = $data["nama_dokter--$dataKey"];
+        $spesialis = $data["spesialis--$dataKey"];
+        $alamat = $data["alamat--$dataKey"];
+        $no_telp = $data["no_telp--$dataKey"];
 
         $query = "UPDATE `$table` SET 
             nama_dokter = '$nama_dokter', 
@@ -267,6 +310,24 @@ function edit($datas, $table){
     // }
 }
 
+function delete($ids){
+    global $conn;
+    $query = "DELETE FROM `tb_dokter` WHERE ";
+
+    foreach($ids as $index => $id){
+        $query .= "id = $id";
+        if($index != count($ids) - 1){
+            $query .= " OR ";
+        }
+    }
+
+    mysqli_query($conn, $query);
+    if(mysqli_affected_rows($conn) > 0){
+        return new W_Message("Data berhasil di hapus!", "success");
+    }else{
+        return new W_Message("Data gagal di hapus!", "failed");
+    }
+}
 
 
 ?>

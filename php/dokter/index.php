@@ -2,7 +2,26 @@
 $GLOBALS['title'] = 'EHealt | Tabel Dokter';
 require_once "../functions.php";
 
+EnsureUserAuth($conn, "php/dokter");
+
 $datas = query("SELECT * FROM `tb_dokter`");
+
+$limit = 10;
+$current_page = (int) ($_GET['page'] ?? 1);
+$start = ($current_page - 1) * $limit;
+$total_pages = (int) ceil(count($datas) / $limit);
+
+if(isset($_GET['search'])){
+    $keyword = $_GET['search'];
+    $datas = search($keyword, 'tb_dokter');
+    $total_pages = (int) ceil(count($datas) / $limit);
+    $datas = searchWithLimit($keyword, $start, $limit, 'tb_dokter');
+}else{
+    $datas = query("SELECT * FROM `tb_dokter` LIMIT $start, $limit");
+}
+
+
+
 
 ?>
 
@@ -20,7 +39,7 @@ $datas = query("SELECT * FROM `tb_dokter`");
             <!-- search -->
             <form action="" method="post" style="width: 100%; max-width: 480px;">
                 <div class="input-group">
-                    <input type="text" name="search-value" id="search" class="form-control">
+                    <input type="text" name="search-value" id="search-input" class="form-control" data-table="tb_dokter">
                     <button type="submit" name="search-btn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </form>
@@ -28,8 +47,8 @@ $datas = query("SELECT * FROM `tb_dokter`");
         </div>
 
         <?php if(count($datas) > 0): ?>
-        <div class="table-responsive">
-            <form action="" method="get" id="checked_form">
+        <div class="table-responsive" id="table-element">
+            <form action="" method="post" id="checked_form">
                 <table class="table table-striped table-bordered">
                     <tr>
                         <th>
@@ -56,6 +75,25 @@ $datas = query("SELECT * FROM `tb_dokter`");
                     <?php $i++; endforeach; ?>
                 </table>
             </form>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination gap-0">
+                    <li class="page-item <?= $current_page == 1 ? 'disabled' : ''?>">
+                        <a class="page-link" href="?<?= isset($keyword) ? "search=$keyword&" : ''?>page=<?= $current_page - 1?>" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <?php for($j = 0; $j < $total_pages; $j++): ?>
+                            <li class="page-item <?= $j + 1 == $current_page ? 'active' : '' ?>"><a class="page-link" href="?<?= isset($keyword) ? "search=$keyword&" : ''?>page=<?= $j + 1 ?>"><?= $j + 1?></a></li>
+                    <?php endfor; ?>
+                    
+                    <li class="page-item <?= $current_page == $total_pages ? 'disabled' : ''?>">
+                        <a class="page-link" href="?<?= isset($keyword) ? "search=$keyword&" : ''?>page=<?= $current_page + 1?>" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
 
         <div class="d-flex gap-2">
@@ -70,4 +108,5 @@ $datas = query("SELECT * FROM `tb_dokter`");
 </div>
 
 <script src="<?= "$base_url/assets/js/checks.js"?>"></script>
+<script src="<?= "$base_url/assets/js/ajax.js"?>"></script>
 <?php require_once "../partials/footer.php" ?>

@@ -2,7 +2,7 @@
 $GLOBALS['title'] = 'EHealt | Register';
 require_once "./functions.php";
 
-EnsureUserAuth($conn, 'register');
+EnsureUserAuth($conn, 'register', $_SERVER['HTTP_REFERER']);
 
 // email sender
 $sender = 'From:edwin.003@ski.sch.id';

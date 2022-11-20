@@ -32,3 +32,11 @@ editBtn.addEventListener('click', function(){
     checkedForm.submit();
 });
 
+hapusBtn.addEventListener('click', function(){
+    let c = confirm("Yakin menghapus?");
+    if(c){
+        checkedForm.action = './hapus.php';
+        checkedForm.submit();
+    }
+});
+
