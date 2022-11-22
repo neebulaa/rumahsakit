@@ -1,3 +1,17 @@
+::-webkit-scrollbar {
+   display: block;  
+   width: 8px; 
+}
+
+::-webkit-scrollbar-thumb {
+   background:rgb(56, 118, 217);
+   border-radius: 100px;
+}
+
+::-webkit-scrollbar-track {
+   background: none;
+}
+
 :root {
    --gradient: linear-gradient(90deg, rgb(56, 118, 217), rgb(118, 153, 235));
    --gradient-purple: linear-gradient(90deg, rgb(174, 56, 217), rgb(235, 118, 134));

@@ -42,7 +42,7 @@ function CheckToken($conn, $base_url){
         // checkexpiracy
         $expirationtime = mktime(...splitTimeStamp($user['expiration_date']));
         if(alreadyExpires(time(), $expirationtime)){
-            mysqli_query($conn, "DELETE FROM `tb_accesstoken` WHERE `token` = $token"); //delete token record
+            mysqli_query($conn, "DELETE FROM `tb_accesstoken` WHERE `token` = '$token'"); //delete token record
             setcookie('token', '', time() - 3600, $base_url);
             return false;
         }

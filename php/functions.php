@@ -104,13 +104,18 @@ function getTableFields($table){
     foreach($fields as $field => $type){
         if($type === 'id'){
             $formatted['id'] = $field;
-        }else if($type === 'basic'){
+        }else if($type === 'basic' || str_contains($type, "foreign")){
             $formatted['fields'][] = $field;
+            if(str_contains($type, "foreign")){
+                $table = explode(':', $type)[1];
+                $formatted['foreign'][$field] = $table; 
+            }
         }
     }
 
-    return [$formatted['id'], $formatted['fields']];
+    return [$formatted['id'], $formatted['fields'], $formatted['foreign'] ?? []];
 }
+
 
 function getTableRules($table){
     global $tablesRules;
@@ -203,7 +208,8 @@ function login($data){
 
 // CRUD
 function search($keyword, $table){
-    [$tbId, $tbFields] = getTableFields($table);
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
+
     $query = "SELECT * FROM `$table` WHERE ";
     foreach($tbFields as $index => $field){
         $query .= "$field LIKE '%$keyword%'";
@@ -216,7 +222,7 @@ function search($keyword, $table){
 }
 
 function searchWithLimit($keyword, $start, $limit, $table){
-    [$tbId, $tbFields] = getTableFields($table);
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
     $query = "SELECT * FROM `$table` WHERE ";
     foreach($tbFields as $index => $field){
         $query .= "$field LIKE '%$keyword%'";
@@ -230,18 +236,17 @@ function searchWithLimit($keyword, $start, $limit, $table){
 
 }
 
-
-function add($datas, $table){
+function validateHasError($datas, $tableRules){
     global $conn;
-
-    [$tbId, $tbFields] = getTableFields($table);
-    $tableRules = getTableRules($table);
-
     $errors = [];
     foreach($datas as $index => $data){
 
         $data = array_map(function($d){ 
-            return validateText($d); 
+            if(gettype($d) === 'array'){
+                return array_map(fn($s) => validateText($s), $d);
+            }else{
+                return validateText($d); 
+            }
         }, $data);
 
         $dataKey = $index + 1;
@@ -262,6 +267,17 @@ function add($datas, $table){
         $forms_error = new W_ErrorValidator('Forms Error');
         $forms_error->setNewError('forms_error', $errors);
         return $forms_error;
+    }
+}
+
+function add($datas, $table){
+    global $conn;
+
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
+    $tableRules = getTableRules($table);
+
+    if($res = validateHasError($datas, $tableRules)){
+        return $res;
     }
 
     $onlyFields = implode(', ', $tbFields);
@@ -301,34 +317,11 @@ function add($datas, $table){
 function edit($datas, $table){
     global $conn;
     
-    [$tbId, $tbFields] = getTableFields($table);
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
     $tableRules = getTableRules($table);
 
-    $errors = [];
-    foreach($datas as $index => $data){
-
-        $data = array_map(function($d){ 
-            return validateText($d); 
-        }, $data);
-
-        $dataKey = $index + 1;
-
-        $rulesFormatted = [];
-        foreach($tableRules as $field => $rules){
-            $rulesFormatted["$field--$dataKey"] = $rules;
-        }
-
-        $validator = new W_Validator($conn, $data, $rulesFormatted);
-
-        if($validator->fails()){
-            $errors[] = $validator->errors();
-        }
-    }
-
-    if(count($errors) > 0){
-        $forms_error = new W_ErrorValidator('Forms Error');
-        $forms_error->setNewError('forms_error', $errors);
-        return $forms_error;
+    if($res = validateHasError($datas, $tableRules)){
+        return $res;
     }
 
     foreach($datas as $index => $data){
@@ -360,7 +353,7 @@ function edit($datas, $table){
 
 function delete($ids, $table){
     global $conn;
-    [$tbId, $tbFields] = getTableFields($table);
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
 
     $query = "DELETE FROM `$table` WHERE ";
 
@@ -378,6 +371,67 @@ function delete($ids, $table){
         return new W_Message("Data gagal di hapus!", "failed");
     }
 }
+
+
+// rekam medis
+function addRekamMedis($datas, $table){
+    global $conn;
+    
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
+    $tableRules = getTableRules($table);
+
+    if($res = validateHasError($datas, $tableRules)){
+        return $res;
+    }
+
+    
+    $obatIds = [];
+    foreach($datas as $d){
+        $obatIds[] = end($d);
+    }
+        
+    $datas = array_map(function($ar){
+        array_pop($ar);
+        return $ar;
+    }, $datas);
+    
+    $onlyFields = implode(', ', $tbFields);
+    foreach($datas as $index => $data){
+        $query = "INSERT INTO `$table` ($onlyFields) VALUES ";
+
+        $dataKey = $index + 1;
+
+        $statement = "(";
+        foreach($tbFields as $fi => $f){
+            $val = $data["$f--$dataKey"];
+            $statement .= "'$val'";
+
+            if($fi !== count($tbFields) - 1){
+                $statement .= ", ";
+            }
+        }
+        $statement .= ")";
+
+        $query .= $statement;
+        mysqli_query($conn, $query);
+
+        $inserted_id = mysqli_insert_id($conn);
+
+        foreach($obatIds as $obatId){
+            foreach($obatId as $id){
+                mysqli_query($conn, "INSERT INTO `tb_rekammedis_obat` (id_rekammedis, id_obat) VALUES ('$inserted_id', '$id')");
+            }
+        }
+    }
+    
+    
+    if(mysqli_affected_rows($conn) > 0){
+        return new W_Message('Data baru berhasil ditambahkan!', 'success');
+    }else{
+        return new W_Message('Data gagal ditambahkan!', 'failed');
+    }
+}
+
 
 
 ?>

@@ -55,6 +55,16 @@ class W_Validator {
                             $opts = explode(',', $param);
                             $opts = implode(' atau ', $opts);
                             if(!$valid) $errorContainer[] = "$key harus $opts";
+                        case 'in':
+                            if(str_contains($param, ',')){
+                                [$tableName, $fieldName] = explode(',', $param);
+                            }else{
+                                $tableName = $param;
+                                $fieldName = 'id'; //default;
+                            }
+
+                            $valid = $this->in($this->credentials[$key], $tableName, $fieldName);
+                            if(!$valid) $errorContainer[] = "$key tidak sesuai dengan relasi";
                     }
                 }
     
@@ -80,7 +90,28 @@ class W_Validator {
         return in_array($data, $opts);
     }
 
+    function in($data, $table, $field = 'id'){
+        global $conn;
+
+        if(gettype($data) == 'array'){
+            foreach($data as $d){
+                $data_contains = mysqli_query($conn, "SELECT * FROM `$table` WHERE `$field` = '$d'");
+                if(mysqli_num_rows($data_contains) === 0){
+                    return false;
+                };
+            }
+            return true;
+        }else{
+            $data_contains = mysqli_query($conn, "SELECT * FROM `$table` WHERE `$field` = '$data'");
+            return mysqli_num_rows($data_contains) > 0;
+        }
+
+    }
+
     function checkRequired($data){
+        if(gettype($data) == 'array'){
+            return $data[0] !== '';
+        }
         return $data !== '';
     }
 

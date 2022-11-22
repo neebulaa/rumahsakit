@@ -18,7 +18,20 @@ $arr = [
     "a5" => 5
 ];
 
-var_dump(array_map(function($d) {echo $d;}, $arr));
+
+
+
+$testarrr = [1, 2];
+
+if(false){
+    $testarrr[] = 3;
+}
+
+[$s1, $s2, $s3] = [$testarrr[0], $testarrr[1], $testarrr[2] ?? ['aewrawerwe']];
+var_dump($s1, $s2, $s3);
+
+
+
 
 ?>
 

@@ -31,6 +31,15 @@ $tables = [
         "nama_poliklinik" => "basic", 
         "gedung" => "basic"
     ],
+    "tb_rekammedis" => [
+        "id" => "id",
+        "id_pasien" => "foreign:tb_pasien",
+        "keluhan" => "basic",
+        "id_dokter" => "foreign:tb_dokter",
+        "diagnosa" => "basic",
+        "id_poliklinik" => "foreign:tb_poliklinik",
+        "tgl_periksa" => "basic"
+    ]
 ];
 
 $tablesRules = [
@@ -55,6 +64,31 @@ $tablesRules = [
         "nama_poliklinik" => "required|min:3|max:255",
         "gedung" => "required|min:5|max:255",
     ],
+    "tb_rekammedis" => [
+        "id_pasien" => "required|in:tb_pasien,id",
+        "keluhan" => "required|min:3|max:255",
+        "id_dokter" => "required|in:tb_dokter,id",
+        "diagnosa" => "required|min:3|max:255",
+        "id_poliklinik" => "required|in:tb_poliklinik,id",
+        "tgl_periksa" => "required",
+
+        "id_obat" => "required|in:tb_obat,id"   
+    ]
+];
+
+$tableRelations = [
+    // table => [tb_relation => ['field to select in join']]
+    "tb_rekammedis" => [
+        "tb_pasien" => [
+            "nama_pasien:nama_pasien"
+        ],
+        "tb_dokter" => [
+            "nama_dokter:nama_dokter"
+        ],
+        "tb_poliklinik" => [
+            "nama_poliklinik:nama_poliklinik"
+        ],
+    ]
 ]
 
 ?>

@@ -1,9 +1,9 @@
 <?php 
-$GLOBALS['title'] = "EHealth | Edit Dokter";
+$GLOBALS['title'] = "EHealth | Edit Pasien";
 require_once "../functions.php";
-EnsureUserAuth($conn, 'php/dokter/edit.php');
+EnsureUserAuth($conn, 'php/pasien/edit.php');
 
-$current_table = 'tb_dokter';
+$current_table = 'tb_pasien';
 
 if(count($_POST) <= 0 || $_SERVER['REQUEST_METHOD'] === "GET") {
     $_SESSION['process-failed'] = "Silakan pilih data terlebih dahulu!";
@@ -55,12 +55,13 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
     <?php require_once "../partials/sidebar.php" ?>
 
     <div class="container-fluid py-5 mx-5" style="overflow-y: auto; max-height: 100vh;">
-        <h1 class="align-items-center d-flex gap-3">
+    <h1 class="align-items-center d-flex gap-3">
             <a href="./index.php"><i class="fa-solid fa-arrow-left fs-3"></i></a>
-            Edit Dokter
+            Edit Pasien
         </h1>
 
-        <p class="text-muted">Edit dokter EHealth.</p>
+        <p class="text-muted">Edit pasien EHealth.</p>
+
         <div class="custom-underline w-100"></div>
 
         <?php if(isset($error_process)): ?>
@@ -79,11 +80,11 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                     <h5 class="position-absolute text-primary form-counter" style="opacity: .9"><?= $i?></h5>
 
                     <div class="form-group mb-3">
-                        <label for="nama_dokter--<?= $i?>" class="form-label text-muted fs-6 mb-1">Nama Dokter</label>
-                        <input type="text" name="nama_dokter--<?= $i?>" id="nama_dokter--<?= $i?>" class="form-control" value="<?= $old["nama_dokter--$i"] ?? $data['nama_dokter']?>">
-                        <?php if(isset($errorCredentials["nama_dokter--$i"])): ?>
+                        <label for="nomor_identitas--<?= $i?>" class="form-label text-muted fs-6 mb-1">Nomor Identitas</label>
+                        <input type="text" name="nomor_identitas--<?= $i?>" id="nomor_identitas--<?= $i?>" class="form-control" value="<?= $old["nomor_identitas--$i"] ?? $data["nomor_identitas"]?>">
+                        <?php if(isset($errorCredentials["nomor_identitas--$i"])): ?>
                             <div class="text-danger" style="font-size: .9rem">
-                                <?php foreach($errorCredentials["nama_dokter--$i"] as $err): ?>
+                                <?php foreach($errorCredentials["nomor_identitas--$i"] as $err): ?>
                                     <p class="mb-0"><?= $err?></p>
                                 <?php endforeach; ?>
                             </div>
@@ -91,11 +92,28 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="spesialis--<?= $i?>" class="form-label text-muted fs-6 mb-1">Spesialis</label>
-                        <input type="text" name="spesialis--<?= $i?>" id="spesialis--<?= $i?>" class="form-control" value="<?= $old["spesialis--$i"] ?? $data['spesialis']?>">
-                        <?php if(isset($errorCredentials["spesialis--$i"])): ?>
+                        <label for="nama_pasien--<?= $i?>" class="form-label text-muted fs-6 mb-1">Nama Pasien</label>
+                        <input type="text" name="nama_pasien--<?= $i?>" id="nama_pasien--<?= $i?>" class="form-control" value="<?= $old["nama_pasien--$i"] ?? $data["nama_pasien"]?>">
+                        <?php if(isset($errorCredentials["nama_pasien--$i"])): ?>
                             <div class="text-danger" style="font-size: .9rem">
-                                <?php foreach($errorCredentials["spesialis--$i"] as $err): ?>
+                                <?php foreach($errorCredentials["nama_pasien--$i"] as $err): ?>
+                                    <p class="mb-0"><?= $err?></p>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="jenis_kelamin--<?= $i?>" class="form-label text-muted fs-6 mb-1">Jenis Kelamin</label>
+                    
+                        <select class="form-select" name="jenis_kelamin--<?= $i?>" id="jenis_kelamin--<?= $i?>">
+                            <option value="L" <?= ($old["jenis_kelamin--$i"] ?? $data["jenis_kelamin"]) === "L" ? 'selected' : ''?>>Laki-laki</option>
+                            <option value="P" <?= ($old["jenis_kelamin--$i"] ?? $data["jenis_kelamin"]) === "P" ? 'selected' : ''?>>Perempuan</option>
+                        </select>
+
+                        <?php if(isset($errorCredentials["jenis_kelamin--$i"])): ?>
+                            <div class="text-danger" style="font-size: .9rem">
+                                <?php foreach($errorCredentials["jenis_kelamin--$i"] as $err): ?>
                                     <p class="mb-0"><?= $err?></p>
                                 <?php endforeach; ?>
                             </div>
@@ -104,7 +122,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
 
                     <div class="form-group mb-3">
                         <label for="alamat--<?= $i?>" class="form-label text-muted fs-6 mb-1">Alamat</label>
-                        <input type="text" name="alamat--<?= $i?>" id="alamat--<?= $i?>" class="form-control" value="<?= $old["alamat--$i"] ?? $data['alamat']?>">
+                        <input type="text" name="alamat--<?= $i?>" id="alamat--<?= $i?>" class="form-control" value="<?= $old["alamat--$i"] ?? $data["alamat"]?>">
                         <?php if(isset($errorCredentials["alamat--$i"])): ?>
                             <div class="text-danger" style="font-size: .9rem">
                                 <?php foreach($errorCredentials["alamat--$i"] as $err): ?>
@@ -115,8 +133,8 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="no_telp--<?= $i?>" class="form-label text-muted fs-6 mb-1">No Telpon</label>
-                        <input type="text" name="no_telp--<?= $i?>" id="no_telp--<?= $i?>" class="form-control" value="<?= $old["no_telp--$i"] ?? $data['no_telp']?>">
+                        <label for="no_telp--<?= $i?>" class="form-label text-muted fs-6 mb-1">No Telp</label>
+                        <input type="text" name="no_telp--<?= $i?>" id="no_telp--<?= $i?>" class="form-control" value="<?= $old["no_telp--$i"] ?? $data["no_telp"]?>">
                         <?php if(isset($errorCredentials["no_telp--$i"])): ?>
                             <div class="text-danger" style="font-size: .9rem">
                                 <?php foreach($errorCredentials["no_telp--$i"] as $err): ?>
@@ -125,7 +143,6 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                             </div>
                         <?php endif; ?>
                     </div>
-
                 </div>
                 <?php endforeach; ?>
 
