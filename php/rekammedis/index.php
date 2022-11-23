@@ -47,19 +47,19 @@ if($tbRelation){
         }
 
         $tbForeignId = $tbForeign[$tableRelate];
-        $tbJoinStr .= "INNER JOIN `$tableRelate` ON `$current_table`.`$tbForeignId` = `$tableRelate`.`$tbIdToRelate` ";
+        $tbJoinStr .= "INNER JOIN `$tableRelate` ON `$current_table`.`$tbForeignId` = `$tableRelate`.`$tbIdToRelate`";
     }
 
     $queryStr .= $tbSelectionStr;
     $queryStr .= "FROM `$current_table` ";
     $queryStr .= $tbJoinStr;
+    $queryStr .= "ORDER BY `$current_table`.id";
 
 }else{
     $queryStr = "SELECT * FROM `$current_table`";
 }
 
 $datas = query($queryStr);
-
 $total_datas = count($datas);
 
 $limit = 10;
@@ -127,7 +127,7 @@ if(isset($_GET['search']) || isset($_POST['search-btn'])){
             <?php if(count($datas) > 0): ?>
                 <form action="" method="post" id="checked_form">
                     <table class="table table-striped table-bordered caption-top">
-                        <caption>Saat ini <?= $total_datas ?> pasien.</caption>
+                        <caption>Saat ini <?= $total_datas ?> rekam medis.</caption>
                         <tr>
                             <th>
                                 <input type="checkbox" class="form-check-input mx-auto d-block" id="select-all-checks" style="width: 20px; height: 20px;">
@@ -139,6 +139,7 @@ if(isset($_GET['search']) || isset($_POST['search-btn'])){
                             <th>Diagnosa</th>
                             <th>Nama Poliklinik (id)</th>
                             <th>Tanggal Periksa</th>
+                            <th>Obat</th>
                         </tr>
 
                         <?php $i = $start + 1; foreach($datas as $data): ?>
@@ -153,6 +154,24 @@ if(isset($_GET['search']) || isset($_POST['search-btn'])){
                                 <td><?= $data['diagnosa']?></td>
                                 <td><?=$data['nama_poliklinik'] ?> (<?= $data['id_poliklinik']?>)</td>
                                 <td><?= $data['tgl_periksa']?></td>
+
+                                <?php 
+                                $id_rm = $data['id'];
+
+                                $rm_obat = query("SELECT * FROM `tb_rekammedis_obat` WHERE `id_rekammedis` = $id_rm");
+
+                                $rm_obat_id = array_map(fn($e) => $e['id_obat'], $rm_obat);
+                                $obat = [];
+
+                                foreach($rm_obat_id as $rmo){
+                                    $obat[] = query("SELECT * FROM `tb_obat` WHERE `id` = $rmo")[0];
+                                }
+
+                                $strObat = implode(', ', array_map(fn($o) => $o['nama_obat'], $obat));
+                                ?>
+                                <td style="max-width: 16rem;">
+                                    <?= $strObat?>
+                                </td>
                             </tr>
                         <?php $i++; endforeach; ?>
                     </table>

@@ -3,8 +3,7 @@ $GLOBALS['title'] = 'EHealt | Rumah Sakit';
 require_once "./php/functions.php";
 
 EnsureUserAuth($conn);
-
-$counts = getCounts('tb_pasien', 'tb_dokter', 'tb_obat', 'tb_poliklinik', 'tb_rekammedis')[0];
+$counts = getCounts('tb_dokter', 'tb_pasien', 'tb_obat', 'tb_poliklinik', 'tb_rekammedis')[0];
 
 
 ?>

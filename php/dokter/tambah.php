@@ -54,7 +54,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
         <div class="row">
             <div class="col-6">
                 <form action="" method="post" class="mt-4">
-                    <label for="form_count">Buat berapa form: </label>
+                    <label for="form_count">Buat berapa form, pastikan ditentukan dari awal supaya tidak kerefresh (max-9): </label>
                     <div class="input-group">
                         <input type="number" class="form-control" name="form_count" min="1" max="9" pattern="[0-9]" value="1">
                         <button type="submit" name="create_form" class="btn btn-secondary">Buat form</button>

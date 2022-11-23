@@ -33,7 +33,6 @@ class W_Validator {
     
                 if(str_contains($rule, ':')){
                     [$funcType, $param] = explode(':', $rule);
-    
                     switch($funcType){
                         case 'min' : 
                             $valid = $this->checkMin($this->credentials[$key], $param);
@@ -50,11 +49,13 @@ class W_Validator {
                         case 'same':
                             $valid = $this->checkSame($this->credentials[$key], $param);
                             if(!$valid) $errorContainer[] = "$key tidak sesuai dengan $param";
+                            break;
                         case 'enum':
                             $valid = $this->enum($this->credentials[$key], $param);
                             $opts = explode(',', $param);
                             $opts = implode(' atau ', $opts);
                             if(!$valid) $errorContainer[] = "$key harus $opts";
+                            break;
                         case 'in':
                             if(str_contains($param, ',')){
                                 [$tableName, $fieldName] = explode(',', $param);
@@ -65,6 +66,7 @@ class W_Validator {
 
                             $valid = $this->in($this->credentials[$key], $tableName, $fieldName);
                             if(!$valid) $errorContainer[] = "$key tidak sesuai dengan relasi";
+                            break;
                     }
                 }
     
@@ -110,7 +112,7 @@ class W_Validator {
 
     function checkRequired($data){
         if(gettype($data) == 'array'){
-            return $data[0] !== '';
+            return count($data) !== 0;
         }
         return $data !== '';
     }

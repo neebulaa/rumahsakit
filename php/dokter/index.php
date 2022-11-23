@@ -10,7 +10,7 @@ $current_table = 'tb_dokter';
 $datas = query("SELECT * FROM `$current_table`");
 $total_datas = count($datas);
 
-$limit = 10;
+$limit = $_GET['limit'] ?? 10;
 $current_page = (int) ($_GET['page'] ?? 1);
 $start = ($current_page - 1) * $limit;
 $total_pages = (int) ceil(count($datas) / $limit);
@@ -48,7 +48,10 @@ if(isset($_GET['search']) || isset($_POST['search-btn'])){
                     <button type="submit" name="search-btn" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
             </form>
-            <a href="./tambah.php" class="btn btn-outline-primary">Tambah</a>
+            <div class="action d-flex gap-4 align-items-center">
+                <a onclick="window.location.reload()"><i class="text-success fs-4 fa-solid fa-arrows-rotate" style="cursor: pointer"></i></a>
+                <a href="./tambah.php" class="btn btn-outline-primary">Tambah</a>
+            </div>
         </div>
 
         <?php if(isset($_SESSION['process-success'])): ?>
@@ -73,7 +76,7 @@ if(isset($_GET['search']) || isset($_POST['search-btn'])){
             <?php if(count($datas) > 0): ?>
             <form action="" method="post" id="checked_form">
                 <table class="table table-striped table-bordered caption-top">
-                    <caption>Saat ini <?= $total_datas ?> dokter.</caption>
+                    <caption>Saat ini ada <?= $total_datas ?> dokter.</caption>
                     <tr>
                         <th>
                             <input type="checkbox" class="form-check-input mx-auto d-block" id="select-all-checks" style="width: 20px; height: 20px;">

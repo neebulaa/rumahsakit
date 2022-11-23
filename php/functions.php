@@ -207,7 +207,7 @@ function login($data){
 
 
 // CRUD
-function search($keyword, $table){
+function search($keyword, $table, $withLimit = false){
     [$tbId, $tbFields, $tbForeign] = getTableFields($table);
 
     $query = "SELECT * FROM `$table` WHERE ";
@@ -218,19 +218,16 @@ function search($keyword, $table){
             $query .= " OR ";
         }
     }
-    return query($query);
+
+    if(!$withLimit){
+        return query($query);
+    }else{
+        return $query;
+    }
 }
 
 function searchWithLimit($keyword, $start, $limit, $table){
-    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
-    $query = "SELECT * FROM `$table` WHERE ";
-    foreach($tbFields as $index => $field){
-        $query .= "$field LIKE '%$keyword%'";
-
-        if($index !== count($tbFields) - 1){
-            $query .= " OR ";
-        }
-    }
+    $query = search($keyword, $table, true);
     $query .= " LIMIT $start, $limit";
     return query($query);
 
@@ -255,15 +252,14 @@ function validateHasError($datas, $tableRules){
         foreach($tableRules as $field => $rules){
             $rulesFormatted["$field--$dataKey"] = $rules;
         }
-
+        
         $validator = new W_Validator($conn, $data, $rulesFormatted);
 
-        if($validator->fails()){
-            $errors[] = $validator->errors();
-        }
+        $validator->fails();
+        $errors[] = $validator->errors();
     }
 
-    if(count($errors) > 0){
+    if(w_validator_errors_contains_errors($errors)){
         $forms_error = new W_ErrorValidator('Forms Error');
         $forms_error->setNewError('forms_error', $errors);
         return $forms_error;
@@ -380,25 +376,21 @@ function addRekamMedis($datas, $table){
     [$tbId, $tbFields, $tbForeign] = getTableFields($table);
     $tableRules = getTableRules($table);
 
+    $newDatas = [];
+    foreach($datas as $d){
+        $obatIds = array_filter(end($d), fn($id) => $id !== '');
+        $d[array_key_last($d)] = $obatIds;
+        $newDatas[] = $d;
+    }
+    $datas = $newDatas;
+
     if($res = validateHasError($datas, $tableRules)){
         return $res;
     }
-
-    
-    $obatIds = [];
-    foreach($datas as $d){
-        $obatIds[] = end($d);
-    }
-        
-    $datas = array_map(function($ar){
-        array_pop($ar);
-        return $ar;
-    }, $datas);
     
     $onlyFields = implode(', ', $tbFields);
     foreach($datas as $index => $data){
         $query = "INSERT INTO `$table` ($onlyFields) VALUES ";
-
         $dataKey = $index + 1;
 
         $statement = "(";
@@ -417,10 +409,8 @@ function addRekamMedis($datas, $table){
 
         $inserted_id = mysqli_insert_id($conn);
 
-        foreach($obatIds as $obatId){
-            foreach($obatId as $id){
-                mysqli_query($conn, "INSERT INTO `tb_rekammedis_obat` (id_rekammedis, id_obat) VALUES ('$inserted_id', '$id')");
-            }
+        foreach($data["id_obat--$dataKey"] as $id){
+            mysqli_query($conn, "INSERT INTO `tb_rekammedis_obat` (id_rekammedis, id_obat) VALUES ('$inserted_id', '$id')");
         }
     }
     
@@ -431,6 +421,176 @@ function addRekamMedis($datas, $table){
         return new W_Message('Data gagal ditambahkan!', 'failed');
     }
 }
+
+function editRekamMedis($datas, $table){
+    global $conn;
+    
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
+    $tableRules = getTableRules($table);
+
+    $newDatas = [];
+    foreach($datas as $d){
+        $obatIds = array_filter(end($d), fn($id) => $id !== '');
+        $d[array_key_last($d)] = $obatIds;
+        $newDatas[] = $d;
+    }
+    $datas = $newDatas;
+
+    if($res = validateHasError($datas, $tableRules)){
+        return $res;
+    }
+
+    foreach($datas as $index => $data){
+        $dataKey = $index + 1;
+
+        $query = "UPDATE `$table` SET ";
+        foreach($tbFields as $fi => $f){
+            $dataField = $data["$f--$dataKey"];
+            $query .= "$f = '$dataField'";
+
+            if($fi !== count($tbFields) - 1){
+                $query .= ', ';
+            }
+        }
+        $id_rm = $data["$tbId--$dataKey"];
+        $query .= " WHERE `$tbId` = $id_rm";
+
+        mysqli_query($conn, $query);
+
+        
+
+        // delete all rekammedis_obat
+        mysqli_query($conn, "DELETE FROM `tb_rekammedis_obat` WHERE `id_rekammedis` = '$id_rm'");
+
+        foreach($data["id_obat--$dataKey"] as $id){
+            mysqli_query($conn, "INSERT INTO `tb_rekammedis_obat` (id_rekammedis, id_obat) VALUES ('$id_rm', '$id')");
+        }
+    }
+     
+
+    // if(mysqli_affected_rows($conn) > 0){
+    return new W_Message('Data berhasil diubah!', 'success');
+    // }
+    // else{
+    //     return new W_Message('Data gagal diubah!', 'failed');
+    // }
+}
+
+function searchRekamMedis($keyword, $table, $withLimit = false){
+    global $tableRelations;
+
+    [$tbId, $tbFields, $tbForeign] = getTableFields($table);
+
+    $tablesToSearch = array_values($tbForeign);
+    $tablesToSearch[] = 'tb_obat';
+
+
+    $searched_values = [];
+    foreach($tablesToSearch as $tb){
+        $res = search($keyword, $tb);
+        $res_id = array_map(fn($d) => $d['id'], $res);
+
+        $tbType = explode('tb_', $tb);
+        $tbId = implode('id_', $tbType);
+
+        $searched_values[$tbId] = $res_id;
+    };
+
+
+    // search obat
+    $obat_searched_values = $searched_values['id_obat'];
+    if(count($obat_searched_values) > 0){
+        $queryToTakeObat = 'SELECT `tb_rekammedis_obat`.`id_rekammedis` FROM `tb_rekammedis_obat` WHERE ';
+        foreach($obat_searched_values as $oidx => $osv){
+            $queryToTakeObat .= "`id_obat` = '$osv'";
+    
+            if($oidx !== count($obat_searched_values) - 1){
+                $queryToTakeObat .= " OR ";
+            }
+        }
+
+        $rm_ids = array_unique(array_map(fn($qo) => $qo['id_rekammedis'], query($queryToTakeObat)));
+    }
+
+    unset($searched_values['id_obat']);
+
+    // search 3 other tables (dokter, pasien, klinik)
+    $query = "SELECT `$table`.*, ";
+    $queryToTake = " WHERE 
+    `$table`.`keluhan` LIKE '%$keyword%' OR
+    `$table`.`tgl_periksa` LIKE '%$keyword%' OR
+    `$table`.`diagnosa` LIKE '%$keyword%'";
+
+    foreach($searched_values as $tableId => $searched_value){
+        foreach($searched_value as $idValue){
+            $queryToTake .= " OR `$table`.`$tableId` = $idValue";
+        }
+    }
+
+    foreach(($rm_ids ?? []) as $rm_id){
+        $queryToTake .= " OR `tb_rekammedis`.`id` = $rm_id";
+    }
+
+
+
+    $tbRelation = $tableRelations[$table] ?? false;
+    if($tbRelation){
+        [$tbsToRelate, $tbsFieldToGet] = [array_keys($tbRelation), array_values($tbRelation)];
+        [$tbId, $tbFields, $tbForeign] = getTableFields($table);
+        $tbForeign = array_flip($tbForeign);
+
+        $tbSelectionStr = "";
+        $tbJoinStr = "";
+
+        foreach($tbsToRelate as $tIdx => $tableRelate) {
+            [$tbIdToRelate] = getTableFields($tableRelate);
+            foreach($tbsFieldToGet[$tIdx] as $fIdx => $fieldToGet){
+                // selection field name and 'as'
+                $fieldName = $fieldToGet;
+                if(str_contains($fieldName, ':')){
+                    [$fieldName, $fieldNameAs] = explode(':', $fieldToGet);
+                }else{
+                    $fieldNameAs = $fieldName;
+                }
+                $tbSelectionStr .= "`$tableRelate`.`$fieldName` as `$fieldNameAs`";
+
+                if($tIdx !== count($tbsToRelate) - 1){
+                    $tbSelectionStr .= ",";
+                }
+                $tbSelectionStr .= " ";
+            }
+
+            $tbForeignId = $tbForeign[$tableRelate];
+            $tbJoinStr .= " INNER JOIN `$tableRelate` ON `$table`.`$tbForeignId` = `$tableRelate`.`$tbIdToRelate`";
+        }
+
+        $query .= $tbSelectionStr;
+        $query .= "FROM `$table` ";
+        $query .= $tbJoinStr;
+        $query .= $queryToTake;
+        $query .= " ORDER BY `$table`.id";
+    }
+
+    // var_dump($query);
+    // die();
+
+
+    if(!$withLimit){
+        return query($query);
+    }else{
+        return $query;
+    }
+
+}
+
+function searchRekamMedisWithLimit($keyword, $start, $limit, $table){
+
+    $query = searchRekamMedis($keyword, $table, true);
+    $query .= " LIMIT $start, $limit";
+    return query($query);
+
+}
+
 
 
 

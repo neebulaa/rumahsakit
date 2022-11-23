@@ -22,7 +22,6 @@ if($tbRelation){
         $data = query("SELECT `$tableToRelate`.`$tbId`, `$tableToRelate`.`nama_$_nama` FROM `$tableToRelate`");
         $dataToShow[$tableToRelate] = $data;
     }
-
 }
 
 
@@ -36,9 +35,9 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
     if(isset($_POST['add'])){
         // format data
         $form_count = $_POST['add'];
-        $old = $_POST;
         // var_dump($_POST['id_obat--1']);
         // die();
+
         $formatted_data = formatMultipleFormData($_POST, $form_count);
         $result = addRekamMedis($formatted_data, $current_table);
 
@@ -46,6 +45,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
             $errorCredentials = $result->getErrors()['forms_error'];
             $mergeErrorCredentials = w_validator_errors_merge($errorCredentials);
             $errorCredentials = $mergeErrorCredentials['errors'];
+            $old = $mergeErrorCredentials['old'];
         }else{
             if($result->status == 'success'){
                 $_SESSION['process-success'] = $result->message;
@@ -77,7 +77,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
         <div class="row">
             <div class="col-6">
                 <form action="" method="post" class="mt-4">
-                    <label for="form_count">Buat berapa form: </label>
+                    <label for="form_count">Buat berapa form, pastikan ditentukan dari awal supaya tidak kerefresh (max-9): </label>
                     <div class="input-group">
                         <input type="number" class="form-control" name="form_count" min="1" max="9" pattern="[0-9]" value="1">
                         <button type="submit" name="create_form" class="btn btn-secondary">Buat form</button>
@@ -194,13 +194,21 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
                     <div class="form-group mb-3">
                         <label for="id_obat--<?= $i?>" class="form-label text-muted fs-6 mb-1">Obat</label>
                     
-                        <select multiple class="form-select" name="id_obat--<?= $i?>[]" id="id_obat--<?= $i?>">
-                            <option value="" <?= (!isset($old["id_obat--$i"]) || $old["id_obat--$i"][0] === '') ? 'selected' : ''?>>-- Select --</option>
+                        <?php
+
+                            // if user change value in the devtools
+
+                            $strict = array_filter($old["id_obat--$i"] ?? [], function($id) use ($dataToShow){ 
+                                return in_array($id, array_map(fn($dts) => $dts['id'], $dataToShow['tb_obat']));
+                            });
+
+                            $notStrict = count($strict) != count($old["id_obat--$i"] ?? []);
+                        ?>
+                        <select multiple class="form-select" name="id_obat--<?= $i?>[]" id="id_obat--<?= $i?>" style="min-height: 10rem">
+                            <option value="" <?= (count($old["id_obat--$i"] ?? []) == 0 || $notStrict) ? 'selected' : ''?>>-- Select --</option>
 
                             <?php foreach($dataToShow['tb_obat'] as $opt): ?>
-
-                                <option value="<?= $opt['id']?>" <?= in_array($opt['id'], (
-                                    $old["id_obat--$i"] ?? [] )) ? 'selected' : ''?>><?= $opt['nama_obat']?> (<?= $opt['id']?>)</option>
+                                <option value="<?= $opt['id']?>" <?= in_array($opt['id'], ($old["id_obat--$i"] ?? [] )) ? 'selected' : ''?>><?= $opt['nama_obat']?> (<?= $opt['id']?>)</option>
                             <?php endforeach; ?>
                         </select>
 

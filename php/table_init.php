@@ -77,7 +77,7 @@ $tablesRules = [
 ];
 
 $tableRelations = [
-    // table => [tb_relation => ['field to select in join']]
+    // table => [tb_relation => ['field to select in join that are relate to the table']]
     "tb_rekammedis" => [
         "tb_pasien" => [
             "nama_pasien:nama_pasien"
