@@ -138,12 +138,12 @@ function sendMail($email, $code){
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'edwin.003@ski.sch.id';
-    $mail->Password = 'zymhxmurljojteeb';
+    $mail->Username = 'your email';
+    $mail->Password = 'your code';
     $mail->SMTPSecure = 'ssl';
     $mail->Port = 465;
 
-    $mail->setFrom('edwin.003@ski.sch.id');
+    $mail->setFrom('your email');
     $mail->addAddress($email);
     $mail->isHTML(true);
     $mail->Subject = "Email Verification";
