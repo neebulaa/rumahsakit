@@ -240,8 +240,10 @@ function login($data){
     $user = mysqli_fetch_assoc($user_exist);
 
     // check user already verified
-    if($user['email_verified_at'] === NULL){
-        return new W_Message('Email ini belum terverifikasi!', 'need-verify');
+    if($user !== null){
+        if($user['email_verified_at'] === NULL){
+            return new W_Message('Email ini belum terverifikasi!', 'need-verify');
+        }
     }
 
     if($user){
