@@ -2,27 +2,31 @@
 $GLOBALS['title'] = 'EHealt | Register';
 require_once "./functions.php";
 
-EnsureUserAuth($conn, 'register', $_SERVER['HTTP_REFERER']);
-
-// email sender
-$sender = 'From:edwin.003@ski.sch.id';
+EnsureUserAuth($conn, 'register');
 
 if($_SERVER['REQUEST_METHOD'] === "POST"){
     if(isset($_POST['register'])){
+        $otp = random_int(100000, 999999);
+        $_POST['verification_code'] = $otp;
+
         $result = register($_POST);
+        $old = $_POST;
 
         if($result instanceof W_ErrorValidator){
             $errorCredentials = $result->getErrors();
-            $old = $result->old();
+            // $old = $result->old();
         }else{
             if($result > 0){
-                mail($_POST['email'], 'Register Success', 'Registrasi Anda berhasil, silakan klik link ini untuk memverfikasi anda', $sender);
-                echo "
-                    <script>
-                        alert('Anda berhasil register! Sebuah Verifikasi telah dikirimkan ke email anda!');
-                        document.location.href = './login.php';
-                    </script>
-                ";
+                $email_sended = sendMail($_POST['email'], $otp);
+
+                if($email_sended){
+                    $_SESSION['process-success'] = "You successfully registered. Check your email for verification code!";
+                    echo "
+                        <script>
+                            document.location.href = './verify.php';
+                        </script>
+                    ";
+                }
             }else{
                 echo "
                     <script>

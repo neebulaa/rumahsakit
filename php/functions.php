@@ -1,5 +1,13 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 $dir = __DIR__; 
+require "$dir/../phpmailer/src/Exception.php";
+require "$dir/../phpmailer/src/PHPMailer.php";
+require "$dir/../phpmailer/src/SMTP.php";
+
+
 require_once "$dir/Classes/W_Validator.php";
 require_once "$dir/Classes/W_Message.php";
 require_once "$dir/Middleware/EnsureUserAuth.php";
@@ -125,6 +133,64 @@ function getTableRules($table){
 
 
 // auth
+function sendMail($email, $code){
+    $mail = new PHPMailer(true);
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'edwin.003@ski.sch.id';
+    $mail->Password = 'zymhxmurljojteeb';
+    $mail->SMTPSecure = 'ssl';
+    $mail->Port = 465;
+
+    $mail->setFrom('edwin.003@ski.sch.id');
+    $mail->addAddress($email);
+    $mail->isHTML(true);
+    $mail->Subject = "Email Verification";
+    $mail->Body = "Your verification code is: <h2><b>$code</b></h2>";
+    if($mail->send()){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+function alreadyVerify($conn, $email){
+    $user = mysqli_query($conn, "SELECT * FROM `tb_user` WHERE email = '$email' AND `email_verified_at` NOT NULL");
+    return mysqli_num_rows($user) > 0;
+}
+
+function verify($data){
+    global $conn;
+    $verification_code = $data['verification_code'];
+
+    // validation
+    $validator = new W_Validator($conn, compact('verification_code'), [
+        "verification_code" => "required|digit|min:6|max:6"
+    ]);
+
+    if($validator->fails()){
+        return $validator->errors();
+    }
+
+    $user_exist = mysqli_query($conn, "SELECT * FROM `tb_user` WHERE `verification_code` = '$verification_code'");
+    $user = mysqli_fetch_assoc($user_exist);
+
+    $currentTimeStamp = date("Y-m-d H:i:s", time());
+    mysqli_query($conn, "UPDATE `tb_user` SET `email_verified_at` = '$currentTimeStamp' WHERE `verification_code` = '$verification_code' AND `email_verified_at` IS NULL");
+
+    if(mysqli_affected_rows($conn) > 0){
+        $_SESSION['login'] = true; 
+        $_SESSION['user'] = [
+            "nama" => $user['nama'],
+            "email" => $user['email']
+        ];
+        return new W_Message('Verifikasi kode valid!', 'success');
+    }else{
+        return new W_Message('Verifikasi kode salah!', 'failed');
+    }
+}
+
 function register($data){
     global $conn;
     
@@ -132,7 +198,7 @@ function register($data){
     $email = validateText($data['email']);
     $password = mysqli_real_escape_string($conn, $data['password']);
     $konfirmasi_password = mysqli_real_escape_string($conn, $data['konfirmasi_password']);
-    
+    $verification_code = $data['verification_code'];
 
     // Validation
     $credentials = compact(['nama', 'email', 'password', 'konfirmasi_password']);
@@ -147,11 +213,10 @@ function register($data){
         return $validator->errors(); //type W_Error
     }
     
-
     $password = password_hash($password, PASSWORD_BCRYPT);
     $level = 'Admin'; //all user
 
-    mysqli_query($conn, "INSERT INTO `tb_user` VALUES ('', '$nama', '$email', '$password', '$level');");
+    mysqli_query($conn, "INSERT INTO `tb_user` VALUES ('', '$nama', '$email', '$password', '$level', '$verification_code', NULL);");
     return mysqli_affected_rows($conn);
 }
 
@@ -173,6 +238,11 @@ function login($data){
 
     $user_exist = mysqli_query($conn, "SELECT * FROM `tb_user` WHERE email = '$email'");
     $user = mysqli_fetch_assoc($user_exist);
+
+    // check user already verified
+    if($user['email_verified_at'] === NULL){
+        return new W_Message('Email ini belum terverifikasi!', 'need-verify');
+    }
 
     if($user){
         if(password_verify($password, $user['password'])){

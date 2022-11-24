@@ -8,11 +8,12 @@ EnsureUserAuth($conn, 'login');
 if($_SERVER['REQUEST_METHOD'] === "POST"){
     if(isset($_POST['login'])){
         $res = login($_POST);
+        $old = $_POST;
+
         if($res instanceof W_ErrorValidator){
             $errorCredentials = $res->getErrors();
         }else if ($res instanceof W_Message){
-
-            if($res->status == 'failed'){
+            if($res->status == 'failed' || $res->status == "need-verify"){
                 $error = $res->message;
             }else{
                 header('Location: ../index.php');
@@ -35,6 +36,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
             <?php if(isset($error)): ?>
                 <div class="alert alert-danger">
                     <?= $error?>
+                    <?= $res->status == "need-verify" ? "<a href='./verify.php'>Verifikasi disini!</a>" : ''?>
                 </div>
             <?php endif; ?>
 
@@ -42,7 +44,7 @@ if($_SERVER['REQUEST_METHOD'] === "POST"){
 
                 <div class="form-group my-3">
                     <label for="email" class="mb-1">Email</label>
-                    <input type="email" id="email" name="email" class="form-control"/>
+                    <input type="email" id="email" name="email" class="form-control" value="<?= $old['email'] ?? ''?>"/>
                     <?php if(isset($errorCredentials['email'])): ?>
                         <div class="text-danger" style="font-size: .9rem">
                             <?php foreach($errorCredentials['email'] as $err): ?>
