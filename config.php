@@ -1,3 +1,5 @@
 <?php 
-$base_url = 'http://localhost/school/11%20TKJ%201/rumahsakit';
+$base_url = 'http://localhost/my-projects/php/rumahsakit';
+$sendmail_auth_username="";
+$sendmail_auth_password="";
 ?>

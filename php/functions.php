@@ -134,16 +134,17 @@ function getTableRules($table){
 
 // auth
 function sendMail($email, $code){
+    global $sendmail_auth_username, $sendmail_auth_password;
     $mail = new PHPMailer(true);
     $mail->isSMTP();
     $mail->Host = 'smtp.gmail.com';
     $mail->SMTPAuth = true;
-    $mail->Username = 'your email';
-    $mail->Password = 'your code';
+    $mail->Username = $sendmail_auth_username;
+    $mail->Password = $sendmail_auth_password;
     $mail->SMTPSecure = 'ssl';
     $mail->Port = 465;
 
-    $mail->setFrom('your email');
+    $mail->setFrom($sendmail_auth_username);
     $mail->addAddress($email);
     $mail->isHTML(true);
     $mail->Subject = "Email Verification";
